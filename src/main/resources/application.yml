@@ -1,0 +1,39 @@
+# Database
+spring:
+    datasource:
+        url: jdbc:postgresql://localhost:5432/task-manager-db
+        username: postgres
+        password: postgres
+    hikari:
+        connection-timeout: 10000
+
+    jpa:
+        generate-ddl: true
+    hibernate:
+        ddl-auto: none
+
+    # Thymeleaf
+    thymeleaf:
+        prefix: classpath:/templates/
+        cache: false
+
+    # Redis
+    data:
+        redis:
+        host: localhost
+        port: 6379
+
+# Spring circular references
+    main:
+        allow-circular-references: true
+
+# Server
+server:
+  port: 8080
+
+# App Custom Properties
+app:
+  jwt:
+    secret: secretkey
+    tokenExpiration: 3m
+    refreshTokenExpiration: 30m

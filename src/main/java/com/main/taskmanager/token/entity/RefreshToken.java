@@ -22,7 +22,7 @@ public class RefreshToken {
     private Long id;
 
     @Indexed
-    private String userId;
+    private Long userId;
 
     @Indexed
     private String token;

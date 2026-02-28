@@ -53,6 +53,7 @@ public class User implements UserDetails {
     @Column(name = "roles ", nullable = false)
     @Enumerated(EnumType.STRING)
     @Builder.Default
+    @Setter(value = AccessLevel.PUBLIC)
     private Set<Role> roles = new HashSet<>();
 
 
