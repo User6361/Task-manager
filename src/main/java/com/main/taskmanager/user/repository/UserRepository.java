@@ -23,6 +23,8 @@ public interface UserRepository extends JpaRepository<User, Long> {
      */
     Optional<User> findByUsername(String username);
 
+
+    //12
     /**
      * Проверяет, существует ли пользователь с заданным логином в базе данных.
      * Используется при регистрации для обеспечения уникальности логина.
