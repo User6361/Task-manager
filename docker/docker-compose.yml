@@ -1,0 +1,21 @@
+version: '3'
+
+services:
+  # PostgreSQL
+  postgres:
+    image: postgres:12.3
+    container_name: docker-postgres-task-manager
+    ports:
+      - "5432:5432"
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_DB=task-manager-db
+
+  # Redis
+  redis:
+    image: redis:6-alpine
+    container_name: docker-redis-task-manager
+    ports:
+      - "6379:6379"
+    command: redis-server --save 60 1 --loglevel warning

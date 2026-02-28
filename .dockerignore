@@ -1,0 +1,9 @@
+.git
+.gitignore
+*.md
+*.iml
+.idea/
+target/*.jar
+!target/your-app.jar
+logs/
+tmp/
