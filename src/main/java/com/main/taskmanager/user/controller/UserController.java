@@ -20,6 +20,7 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 /**
@@ -84,7 +85,7 @@ public class UserController {
         model.addAttribute("full_name", userToView.getFullName());
         model.addAttribute("username", userToView.getUsername());
         model.addAttribute("email", userToView.getEmail());
-        model.addAttribute("role", userToView.getRole().name());
+        model.addAttribute("roles", userToView.getRoles());
 
         log.info("Viewing user profile for ID: {} by current user: {}", userId, currentUser.getUsername());
         /**Обязательно указывает начальную папку без / потому что потом может не сработать при переносе jar файла
@@ -115,11 +116,11 @@ public class UserController {
             @RequestParam(required = false) String password, // Пароль может отсутствовать или быть пустым
             @RequestParam String email,
             @RequestParam String fullName,
-            @RequestParam Role role,
+            @RequestParam Set<Role> roles,
             @AuthenticationPrincipal User currentUser,
             RedirectAttributes redirectAttributes) {
 
-        if (!currentUser.getRole().equals(Role.ADMINISTRATOR)) {
+        if (!currentUser.getRoles().stream().anyMatch(Role.ADMINISTRATOR::equals)) {
             log.warn("User {} attempted to update user {} without ADMIN rights.",
                     currentUser.getUsername(), userId);
             redirectAttributes.addFlashAttribute("errorMessage", "Access denied. Only Administrators can update user profiles.");
@@ -129,11 +130,11 @@ public class UserController {
         try {
             // Выбор метода в зависимости от наличия пароля (логика делегируется сервису)
             if (password != null && !password.trim().isEmpty()) {
-                userService.updateUser(userId, username, password, email, fullName, role, currentUser);
+                userService.updateUser(userId, username, password, email, fullName, roles, currentUser);
                 log.info("Administrator {} updated user {} data AND password.", currentUser.getUsername(), userId);
             } else {
                 // Если пароль отсутствует или пустой, вызываем метод без обновления пароля
-                userService.updateUserWithoutPassword(userId, username, email, fullName, role, currentUser);
+                userService.updateUserWithoutPassword(userId, username, email, fullName, roles, currentUser);
                 log.info("Administrator {} updated user {} data (password untouched).", currentUser.getUsername(), userId);
             }
 
@@ -163,7 +164,7 @@ public class UserController {
      */
     @PostMapping(value = "/delete/{userId}")
     public String deleteUser(@PathVariable("userId") Long userId, @AuthenticationPrincipal User currentUser) {
-        if(!currentUser.getRole().equals(Role.ADMINISTRATOR)) {
+        if(!currentUser.getRoles().stream().anyMatch(Role.ADMINISTRATOR::equals)) {
             log.info("Current user - " + userService.getUserById(userId).toString() + " can not delete user!");
             return "redirect:/users/{userId}";
         }
@@ -193,7 +194,7 @@ public class UserController {
     public String getCreateUserForm(Model model, @AuthenticationPrincipal User currentUser) {
 
         // **АВТОРИЗАЦИЯ:** Строгая проверка прав
-        if (!currentUser.getRole().equals(Role.ADMINISTRATOR)) {
+        if (!currentUser.getRoles().stream().anyMatch(Role.ADMINISTRATOR::equals)) {
             log.warn("User {} attempted to access the create user form without ADMIN rights.", currentUser.getUsername());
             throw new NoRightsException("Access denied. Only Administrators can create new users.");
         }
@@ -233,19 +234,18 @@ public class UserController {
                                 @RequestParam String password,
                                 @RequestParam String email,
                                 @RequestParam String fullName,
-                                @RequestParam String role,
+                                @RequestParam Set<Role> roles,
                                 @AuthenticationPrincipal User currentUser,
                                 RedirectAttributes redirectAttributes) {
 
         // **АВТОРИЗАЦИЯ:** Строгая проверка прав
-        if (!currentUser.getRole().equals(Role.ADMINISTRATOR)) {
+        if (!currentUser.getRoles().stream().anyMatch(Role.ADMINISTRATOR::equals)) {
             log.warn("User {} attempted to create a user without ADMIN rights.", currentUser.getUsername());
             throw new NoRightsException("Access denied. Only Administrators can create new users.");
         }
 
         try {
-            Role userRole = Role.valueOf(role);
-            userService.createUser(username, password, email, fullName, userRole, currentUser);
+            userService.createUser(username, password, email, fullName, roles, currentUser);
             redirectAttributes.addFlashAttribute("successMessage",
                     "User '" + username + "' successfully created.");
             log.info("Administrator {} successfully created new user: {}",
@@ -254,7 +254,7 @@ public class UserController {
 
         } catch (IllegalArgumentException e) {
             redirectAttributes.addFlashAttribute("errorMessage", "Invalid role specified.");
-            log.error("Invalid role value '{}' provided during user creation by {}", role, currentUser.getUsername(), e);
+            log.error("Invalid role value '{}' provided during user creation by {}", roles.toString(), currentUser.getUsername(), e);
             return "redirect:/users/create";
         } catch (Exception e) {
             redirectAttributes.addFlashAttribute("errorMessage", "Error creating user: " + e.getMessage());

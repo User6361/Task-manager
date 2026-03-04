@@ -55,7 +55,7 @@ public class TaskAssignFacade {
                                      String redirectPath){
 
         // Проверка прав для обычных пользователей
-        if (!currentUser.getRole().equals(Role.ADMINISTRATOR)) {
+        if (!currentUser.getRoles().stream().anyMatch(Role.ADMINISTRATOR::equals)) {
             Optional<Task> optionalTask = taskService.getTaskById(taskId);
             // Если задача не найдена или пользователь не назначен, запрещаем операцию
             if (optionalTask.isEmpty() || !optionalTask.get().getAssignee().getId().equals(currentUser.getId())) {

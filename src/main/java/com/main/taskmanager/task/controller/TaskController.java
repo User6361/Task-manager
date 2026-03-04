@@ -66,7 +66,7 @@ public class TaskController {
     @PostMapping("/my-tasks/{taskId}/delete")
     @Loggable
     public String deleteTaskMyTasks(@PathVariable Long taskId, @AuthenticationPrincipal User currentUser) {
-        if(!currentUser.getRole().equals(Role.ADMINISTRATOR)){
+        if(!currentUser.getRoles().stream().anyMatch(Role.ADMINISTRATOR::equals)){
             log.info("User don't have permission to delete task");
             return REDIRECT_MY_TASKS;
         }
@@ -86,7 +86,7 @@ public class TaskController {
     @PostMapping("/{taskId}/delete")
     @Loggable
     public String deleteTask(@PathVariable Long taskId, @AuthenticationPrincipal User currentUser) {
-        if(!currentUser.getRole().equals(Role.ADMINISTRATOR)){
+        if(!currentUser.getRoles().stream().anyMatch(Role.ADMINISTRATOR::equals)){
             log.info("User don't have permission to delete task");
             return REDIRECT_ALL_TASKS;
         }
@@ -258,7 +258,7 @@ public class TaskController {
     @GetMapping("/my-tasks")
     @Loggable
     public String getMyTasks(@AuthenticationPrincipal User currentUser, Model model) {
-        log.info("Current user role - " + currentUser.getRole().toString());
+        log.info("Current user roles - " + currentUser.getRoles().toString());
         List<Task> userTasks = taskService.getUserTasks(currentUser);
         model.addAttribute("tasks", userTasks);
         model.addAttribute("currentUser", currentUser);

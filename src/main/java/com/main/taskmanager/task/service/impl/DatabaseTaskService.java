@@ -75,7 +75,7 @@ public class DatabaseTaskService implements TaskService {
     @Override
     @Transactional
     public Task createTask(CreateTaskRequest request, User user) {
-        if(!user.getRole().equals(Role.ADMINISTRATOR)) {
+        if(!user.getRoles().stream().anyMatch(Role.ADMINISTRATOR::equals)) {
             throw new NoRightsException("You are not allowed to perform this action");
         }
         // Преобразование DTO в сущность и сохранение
@@ -94,7 +94,7 @@ public class DatabaseTaskService implements TaskService {
     @Override
     @Transactional
     public void deleteTaskById(Long taskId, User user) {
-        if(!user.getRole().equals(Role.ADMINISTRATOR)) {
+        if(!user.getRoles().stream().anyMatch(Role.ADMINISTRATOR::equals)) {
             throw new NoRightsException("You are not allowed to perform this action");
         }
         if(!taskRepository.existsById(taskId)) {
@@ -131,7 +131,7 @@ public class DatabaseTaskService implements TaskService {
                 .orElseThrow(() -> new IllegalArgumentException("User not found with id " + assigneeId));
 
         // Проверка прав: Только Администратор или текущий назначенец может менять задачу
-        if(!user.getRole().equals(Role.ADMINISTRATOR) && (task.getAssignee() == null || !user.getId().equals(task.getAssignee().getId()))) {
+        if(!user.getRoles().stream().anyMatch(Role.ADMINISTRATOR::equals) && (task.getAssignee() == null || !user.getId().equals(task.getAssignee().getId()))) {
             throw new NoRightsException("You are not allowed to perform this action");
         }
 
@@ -160,7 +160,7 @@ public class DatabaseTaskService implements TaskService {
                 .orElseThrow(() -> new IllegalArgumentException("Task not found with id " + taskId));
 
         // Проверка прав: Только Администратор или текущий назначенец может снять назначение
-        if(!user.getRole().equals(Role.ADMINISTRATOR) && (task.getAssignee() == null || !user.getId().equals(task.getAssignee().getId()))) {
+        if(!user.getRoles().stream().anyMatch(Role.ADMINISTRATOR::equals) && (task.getAssignee() == null || !user.getId().equals(task.getAssignee().getId()))) {
             throw new NoRightsException("You are not allowed to perform this action");
         }
 

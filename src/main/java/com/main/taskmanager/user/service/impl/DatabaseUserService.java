@@ -23,6 +23,7 @@ import org.springframework.stereotype.Service;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 /**
  * Основная реализация сервиса {@link UserService} для управления пользователями.
@@ -106,12 +107,12 @@ public class DatabaseUserService implements UserService {
     @Override
     @Transactional
     @Loggable
-    public User createUser(String username, String password, String email, String fullName, Role role, User currentUser) {
-        if(!currentUser.getRole().equals(Role.ADMINISTRATOR)) {
+    public User createUser(String username, String password, String email, String fullName, Set<Role> roles, User currentUser) {
+        if(!currentUser.getRoles().stream().anyMatch(Role.ADMINISTRATOR::equals)) {
             log.info("UserService: createUser() -> user dont have permision to create user!");
             throw new NoRightsException("User dont have permision to create user!");
         }
-        return createUserDatabase(username, password, email, fullName, role);
+        return createUserDatabase(username, password, email, fullName, roles);
     }
 
     /**
@@ -120,8 +121,8 @@ public class DatabaseUserService implements UserService {
     @Override
     @Transactional
     @Loggable
-    public User createUserInit(String username, String password, String email, String fullName, Role role) {
-        return createUserDatabase(username, password, email, fullName, role);
+    public User createUserInit(String username, String password, String email, String fullName, Set<Role> roles) {
+        return createUserDatabase(username, password, email, fullName, roles);
     }
 
     /**
@@ -130,8 +131,8 @@ public class DatabaseUserService implements UserService {
     @Override
     @Transactional
     @Loggable
-    public User createUserRegester(String username, String password, String email, String fullName, Role role) {
-        return createUserDatabase(username, password, email, fullName, role);
+    public User createUserRegester(String username, String password, String email, String fullName, Set<Role> roles) {
+        return createUserDatabase(username, password, email, fullName, roles);
     }
 
 
@@ -176,7 +177,7 @@ public class DatabaseUserService implements UserService {
         if(!userRepository.findById(userId).isPresent()){
             throw new UsernameNotFoundException("User not found: " + userId);
         }
-        if(!currentUser.getRole().equals(Role.ADMINISTRATOR)) {
+        if(!currentUser.getRoles().stream().anyMatch(Role.ADMINISTRATOR::equals)) {
             log.info("UserService: deleteUser() -> user dont have permision to delete user!");
             throw new NoRightsException("User dont have permision to delete user!");
         }
@@ -210,9 +211,9 @@ public class DatabaseUserService implements UserService {
      * @throws UsernameNotFoundException Если обновляемый пользователь не найден.
      */
     @Override
-    public User updateUser(Long id, String username, String newPassword, String email, String fullName, Role role, User currentUser) {
+    public User updateUser(Long id, String username, String newPassword, String email, String fullName, Set<Role> roles, User currentUser) {
 
-        if(!currentUser.getRole().equals(Role.ADMINISTRATOR)) {
+        if(!currentUser.getRoles().stream().anyMatch(Role.ADMINISTRATOR::equals)) {
             log.info("UserService: updateUser() -> user dont have permision to update user!");
             throw new NoRightsException("User dont have permision to update user!");
         }
@@ -230,7 +231,7 @@ public class DatabaseUserService implements UserService {
                 .username(username)
                 .email(email)
                 .fullName(fullName)
-                .role(role)
+                .roles(roles)
                 .build();
 
         // Использование BeanUtils для копирования свойств (кроме id и password)
@@ -260,9 +261,9 @@ public class DatabaseUserService implements UserService {
      * @throws UsernameNotFoundException Если обновляемый пользователь не найден.
      */
     @Override
-    public User updateUserWithoutPassword(Long id, String username, String email, String fullName, Role role, User currentUser) {
+    public User updateUserWithoutPassword(Long id, String username, String email, String fullName, Set<Role> roles, User currentUser) {
 
-        if(!currentUser.getRole().equals(Role.ADMINISTRATOR)) {
+        if(!currentUser.getRoles().stream().anyMatch(Role.ADMINISTRATOR::equals)) {
             log.info("UserService: updateUser() -> user dont have permision to update user!");
             throw new NoRightsException("User dont have permision to update user!");
         }
@@ -281,7 +282,7 @@ public class DatabaseUserService implements UserService {
                 .username(username)
                 .email(email)
                 .fullName(fullName)
-                .role(role)
+                .roles(roles)
                 .build();
 
         // Использование BeanUtils для копирования свойств, сохраняя существующий пароль
@@ -304,14 +305,14 @@ public class DatabaseUserService implements UserService {
      * @param role Роль.
      * @return Созданная сущность {@link User} (еще не сохранена, если не используется {@code userRepository.save(user)} внутри).
      */
-    private User createUserDatabase(String username, String password, String email, String fullName, Role role){
+    private User createUserDatabase(String username, String password, String email, String fullName, Set<Role> roles){
         User user = User.builder()
                 .username(username)
                 // Обязательное хеширование пароля
                 .password(passwordEncoder.encode(password))
                 .email(email)
                 .fullName(fullName)
-                .role(role)
+                .roles(roles)
                 .build();
         return userRepository.save(user);
     }
