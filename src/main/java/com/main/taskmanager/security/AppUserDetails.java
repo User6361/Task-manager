@@ -1,6 +1,5 @@
 package com.main.taskmanager.security;
 
-import com.main.taskmanager.token.repository.RefreshTokenRepository;
 import com.main.taskmanager.user.model.User;
 import lombok.RequiredArgsConstructor;
 import org.jspecify.annotations.Nullable;
