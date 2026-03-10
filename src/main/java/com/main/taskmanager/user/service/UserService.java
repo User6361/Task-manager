@@ -14,7 +14,7 @@ import java.util.Set;
  * Расширяет {@link UserDetailsService}, обеспечивая интеграцию с механизмами
  * аутентификации Spring Security.
  */
-public interface UserService extends UserDetailsService {
+public interface UserService {
 
     List<User> getAllUsers();
 

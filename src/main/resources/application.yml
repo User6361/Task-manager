@@ -1,9 +1,17 @@
 # Database
+server:
+  port: 8083
+
 spring:
-    datasource:
-        url: jdbc:postgresql://localhost:5432/task-manager-db
-        username: postgres
-        password: postgres
+    r2dbc:
+      url: r2dbc:pool:postgresql://localhost:5432/task-manager-db
+      username: postgres
+      password: postgres
+
+#    datasource:
+#        url: jdbc:postgresql://localhost:5432/task-manager-db
+#        username: postgres
+#        password: postgres
     hikari:
         connection-timeout: 10000
 

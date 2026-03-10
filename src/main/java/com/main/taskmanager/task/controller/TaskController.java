@@ -46,7 +46,6 @@ public class TaskController {
      */
     private void prepareBaseModel(User currentUser, Model model) {
         List<Task> userTasks = taskService.getUserTasks(currentUser);
-
         model.addAttribute("currentUser", currentUser);
         model.addAttribute("users", userService.getAllUsers());
         model.addAttribute("countOfMyTasksMessage", taskAssignFacade.getCountOfMyTasksMessage(userTasks));
@@ -243,6 +242,7 @@ public class TaskController {
         model.addAttribute("tasks", taskService.findAllTasks());
         model.addAttribute("users", userService.getAllUsers());
         model.addAttribute("currentUser", currentUser);
+        model.addAttribute("currentUserRoles",  currentUser.getRoles());
         model.addAttribute("countOfMyTasksMessage", taskAssignFacade.getCountOfMyTasksMessage(userTasks));
         log.info("Current User: {}", currentUser);
         return "tasks/all-tasks";

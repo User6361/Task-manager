@@ -5,11 +5,14 @@ import com.main.taskmanager.exception.HaveTasksException;
 import com.main.taskmanager.exception.NoRightsException;
 import com.main.taskmanager.exception.NotFoundUserException;
 import com.main.taskmanager.task.model.Task;
+import com.main.taskmanager.task.model.enumclasses.Priority;
+import com.main.taskmanager.task.model.enumclasses.TaskStatus;
 import com.main.taskmanager.task.repository.TaskRepository;
 import com.main.taskmanager.user.model.enumclasses.Role;
 import com.main.taskmanager.user.service.UserService;
 import com.main.taskmanager.user.model.User;
 import com.main.taskmanager.user.repository.UserRepository;
+import jakarta.persistence.Transient;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -41,30 +44,23 @@ import java.util.Set;
 public class DatabaseUserService implements UserService {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
-    // NOTE: TaskRepository не отмечен final, что может указывать на инъекцию через сеттер или ошибку.
-    private TaskRepository taskRepository;
+    private final TaskRepository taskRepository;
 
-    /**
-     * @inheritDoc
-     */
+
     @Override
     @Loggable
     public List<User> getAllUsers() {
         return userRepository.findAll();
     }
 
-    /**
-     * @inheritDoc
-     */
+
     @Override
     @Loggable
     public Optional<User> getUserById(Long id) {
         return userRepository.findById(id);
     }
 
-    /**
-     * @inheritDoc
-     */
+
     @Override
     public List<Task> getAllTasksOfUser(Long userId) {
         if(getUserById(userId).isPresent()) {
@@ -76,9 +72,7 @@ public class DatabaseUserService implements UserService {
         return new ArrayList<>();
     }
 
-    /**
-     * @inheritDoc
-     */
+
     @Override
     public Optional<Task> getUserTaskById(Long taskId) {
         if(taskRepository.findById(taskId).isPresent()) {
@@ -88,22 +82,13 @@ public class DatabaseUserService implements UserService {
         return Optional.empty();
     }
 
-    /**
-     * @inheritDoc
-     */
     @Override
     @Loggable
     public Optional<User> getUserByUsername(String username) {
         return userRepository.findByUsername(username);
     }
 
-    /**
-     * @inheritDoc
-     * <p>
-     * <b>Требует роли: {@link Role#ADMINISTRATOR}</b>.
-     * </p>
-     * @throws NoRightsException Если текущий пользователь не Администратор.
-     */
+
     @Override
     @Transactional
     @Loggable
@@ -115,9 +100,7 @@ public class DatabaseUserService implements UserService {
         return createUserDatabase(username, password, email, fullName, roles);
     }
 
-    /**
-     * @inheritDoc (Используется для инициализации, без проверки прав).
-     */
+
     @Override
     @Transactional
     @Loggable
@@ -125,9 +108,6 @@ public class DatabaseUserService implements UserService {
         return createUserDatabase(username, password, email, fullName, roles);
     }
 
-    /**
-     * @inheritDoc (Используется для самостоятельной регистрации).
-     */
     @Override
     @Transactional
     @Loggable
@@ -136,9 +116,7 @@ public class DatabaseUserService implements UserService {
     }
 
 
-    /**
-     * @inheritDoc
-     */
+
     @Override
     @Loggable
     public boolean userExists(String username) {
@@ -146,32 +124,7 @@ public class DatabaseUserService implements UserService {
     }
 
 
-    /**
-     * Метод, требуемый интерфейсом {@link UserDetailsService}.
-     * Используется Spring Security для загрузки данных пользователя во время аутентификации.
-     *
-     * @param username Логин пользователя.
-     * @return Объект {@link UserDetails} (которым является {@link User}).
-     * @throws UsernameNotFoundException Если пользователь не найден.
-     */
-    @Override
-    public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        return userRepository.findByUsername(username)
-                .orElseThrow(() -> new UsernameNotFoundException("User not found: " + username));
-    }
 
-    /**
-     * Удаляет пользователя из системы.
-     * <p>
-     * <b>Требует роли: {@link Role#ADMINISTRATOR}</b>.
-     * </p>
-     *
-     * @param userId ID удаляемого пользователя.
-     * @param currentUser Пользователь, выполняющий удаление.
-     * @throws UsernameNotFoundException Если удаляемый пользователь не найден.
-     * @throws NoRightsException Если текущий пользователь не Администратор или пытается удалить самого себя.
-     * @throws HaveTasksException Если у пользователя есть назначенные задачи.
-     */
     @Override
     public void deleteUser(Long userId, User currentUser){
         if(!userRepository.findById(userId).isPresent()){
@@ -201,15 +154,6 @@ public class DatabaseUserService implements UserService {
     }
 
 
-    /**
-     * Обновляет данные пользователя, включая хеширование нового пароля, если он предоставлен.
-     * <p>
-     * <b>Требует роли: {@link Role#ADMINISTRATOR}</b>.
-     * </p>
-     *
-     * @throws NoRightsException Если текущий пользователь не Администратор.
-     * @throws UsernameNotFoundException Если обновляемый пользователь не найден.
-     */
     @Override
     public User updateUser(Long id, String username, String newPassword, String email, String fullName, Set<Role> roles, User currentUser) {
 
@@ -250,16 +194,6 @@ public class DatabaseUserService implements UserService {
     }
 
 
-    /**
-     * Обновляет данные пользователя без изменения пароля.
-     * Используется, если Администратор не вводил новый пароль в форме.
-     * <p>
-     * <b>Требует роли: {@link Role#ADMINISTRATOR}</b>.
-     * </p>
-     *
-     * @throws NoRightsException Если текущий пользователь не Администратор.
-     * @throws UsernameNotFoundException Если обновляемый пользователь не найден.
-     */
     @Override
     public User updateUserWithoutPassword(Long id, String username, String email, String fullName, Set<Role> roles, User currentUser) {
 
@@ -295,16 +229,7 @@ public class DatabaseUserService implements UserService {
     }
 
 
-    /**
-     * Вспомогательный метод для создания и хеширования пароля пользователя перед сохранением.
-     *
-     * @param username Логин.
-     * @param password Нехешированный пароль.
-     * @param email Email.
-     * @param fullName Полное имя.
-     * @param role Роль.
-     * @return Созданная сущность {@link User} (еще не сохранена, если не используется {@code userRepository.save(user)} внутри).
-     */
+
     private User createUserDatabase(String username, String password, String email, String fullName, Set<Role> roles){
         User user = User.builder()
                 .username(username)
@@ -315,5 +240,21 @@ public class DatabaseUserService implements UserService {
                 .roles(roles)
                 .build();
         return userRepository.save(user);
+    }
+
+
+
+    @Transient
+    public int getCountOfTasksWithСertainStatus(Long userId, TaskStatus status){
+        User user =  userRepository.findById(userId).orElseThrow(() -> new UsernameNotFoundException("Не найден пользователь с ID: " + userId));
+        return user.getAssignedTasks().stream().filter(task -> task.getStatus().equals(status)).toList().size();
+    }
+
+    @Transient
+    public int getUserTasksWithHighPriority(Long userId){
+        User user =  userRepository.findById(userId).orElseThrow(() -> new UsernameNotFoundException("Не найден пользователь с ID: " + userId));
+        return user.getAssignedTasks().stream().filter(task ->
+                task.getPriority().equals(Priority.URGENT) ||
+                        task.getPriority().equals(Priority.HIGH)).toList().size();
     }
 }
