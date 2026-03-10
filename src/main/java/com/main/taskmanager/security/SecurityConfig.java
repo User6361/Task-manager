@@ -1,6 +1,9 @@
 package com.main.taskmanager.security;
 
 import com.main.taskmanager.user.service.UserService;
+import lombok.RequiredArgsConstructor;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperties;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -16,13 +19,11 @@ import org.springframework.security.web.SecurityFilterChain;
  */
 @Configuration
 @EnableWebSecurity
+@RequiredArgsConstructor
+@ConditionalOnProperty(prefix = "app", name = "auth", havingValue = "basic")
 public class SecurityConfig {
 
-    /**
-     * Предоставляет бин для кодирования паролей.
-     * Используется {@link BCryptPasswordEncoder} — надежный и рекомендованный алгоритм хеширования.
-     * * @return Экземпляр {@link PasswordEncoder}.
-     */
+    private UserDetailsServiceImpl userDetailsService;
     @Bean
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
@@ -70,7 +71,7 @@ public class SecurityConfig {
                         .permitAll()
                 )
                 // Указывает сервис для загрузки данных пользователя при аутентификации.
-                .userDetailsService(userService);
+                .userDetailsService(userDetailsService);
 
         return http.build();
     }

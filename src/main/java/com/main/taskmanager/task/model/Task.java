@@ -3,6 +3,7 @@ package com.main.taskmanager.task.model;
 import com.main.taskmanager.task.model.enumclasses.Priority;
 import com.main.taskmanager.task.model.enumclasses.TaskStatus;
 import com.main.taskmanager.user.model.User;
+
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Size;
 import lombok.*;

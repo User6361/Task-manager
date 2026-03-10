@@ -55,22 +55,6 @@ public class User {
 
 
 
-
-
-    @Transient
-    public int getCountOfTasksWithСertainStatus(TaskStatus status){
-        return getAssignedTasks().stream().filter(task -> task.getStatus().equals(status)).toList().size();
-    }
-
-    @Transient
-    public int getUserTasksWithHighPriority(){
-        return getAssignedTasks().stream().filter(task ->
-                task.getPriority().equals(Priority.URGENT) ||
-                        task.getPriority().equals(Priority.HIGH)).toList().size();
-    }
-
-
-
     @Override
     public String toString() {
         return "User{" +

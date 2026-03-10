@@ -20,10 +20,7 @@ spring:
     hibernate:
         ddl-auto: none
 
-    # Thymeleaf
-    thymeleaf:
-        prefix: classpath:/templates/
-        cache: false
+
 
     # Redis
     data:
@@ -39,9 +36,16 @@ spring:
 server:
   port: 8080
 
-# App Custom Properties
+
 app:
+  auth: token
   jwt:
-    secret: secretkey
-    tokenExpiration: 3m
-    refreshTokenExpiration: 30m
+    password:
+      encoder:
+        secret: 0575102f800048672e80f530b6f6f1fe2108b007316302751632e14b0c4df7f6
+        iteration: 64
+        keyLenght: 256
+    secret: 79d21d70352b250e4d8bd109a9a113e3ae80f444052048165553482e250827e5
+    #seconds
+    expiration: 3600
+    issuer: esty
