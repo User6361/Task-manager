@@ -1,6 +1,5 @@
 package com.main.taskmanager.user.service;
 
-import com.main.taskmanager.task.model.Task;
 import com.main.taskmanager.user.model.User;
 import com.main.taskmanager.user.model.enumclasses.Role;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -20,9 +19,6 @@ public interface UserService {
 
     Optional<User> getUserById(Long id);
 
-    List<Task> getAllTasksOfUser(Long userId);
-
-    Optional<Task> getUserTaskById(Long id);
 
     Optional<User> getUserByUsername(String username);
 

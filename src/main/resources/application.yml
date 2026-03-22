@@ -1,40 +1,41 @@
-# Database
 server:
   port: 8083
 
 spring:
+    sql:
+      init:
+        mode: always
+        schema-locations: classpath:init-sql.sql
+        continue-on-error: true
+
     r2dbc:
       url: r2dbc:pool:postgresql://localhost:5432/task-manager-db
       username: postgres
       password: postgres
 
-#    datasource:
-#        url: jdbc:postgresql://localhost:5432/task-manager-db
-#        username: postgres
-#        password: postgres
     hikari:
         connection-timeout: 10000
-
     jpa:
         generate-ddl: true
     hibernate:
         ddl-auto: none
 
+#    datasource:
+#        url: jdbc:postgresql://localhost:5432/task-manager-db
+#        username: postgres
+#        password: postgres
 
 
-    # Redis
-    data:
-        redis:
-        host: localhost
-        port: 6379
+
+#    # Redis
+#    data:
+#        redis:
+#        host: localhost
+#        port: 6379
 
 # Spring circular references
     main:
         allow-circular-references: true
-
-# Server
-server:
-  port: 8080
 
 
 app:

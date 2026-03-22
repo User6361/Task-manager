@@ -1,6 +1,7 @@
 package com.main.taskmanager.security.react;
 
 import com.main.taskmanager.user.repository.ReactiveUserRepository;
+import com.main.taskmanager.user.service.react.impl.ReactUserServiceImlp;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.ReactiveAuthenticationManager;
 import org.springframework.security.core.Authentication;
@@ -13,11 +14,11 @@ import java.security.Principal;
 @RequiredArgsConstructor
 public class AuthenticationManager implements ReactiveAuthenticationManager {
 
-    private final ReactiveUserRepository reactiveUserRepository;
+    private final ReactUserServiceImlp reactUserServiceImlp;
     @Override
     public Mono<Authentication> authenticate(Authentication authentication) {
         CustomPrincipal principal = (CustomPrincipal) authentication.getPrincipal();
-        return reactiveUserRepository.findById(principal.getId())
+        return reactUserServiceImlp.getUserById(principal.getId())
                 .map(user -> authentication);
 
 

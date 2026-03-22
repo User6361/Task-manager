@@ -7,16 +7,24 @@ import io.jsonwebtoken.Claims;
 
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.Jwts;
+import io.jsonwebtoken.io.Decoders;
+import io.jsonwebtoken.security.Keys;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Component;
 import reactor.core.publisher.Mono;
 
+import javax.crypto.SecretKey;
+import java.nio.charset.StandardCharsets;
 import java.util.Base64;
 import java.util.Date;
-
+@Component
+@Slf4j
 public class JwtHandler {
 
     private final String secret;
 
-    public JwtHandler(String secret) {
+    public JwtHandler(@Value("${app.jwt.secret}") String secret) {
         this.secret = secret;
     }
 
@@ -36,11 +44,13 @@ public class JwtHandler {
     }
 
     public Claims getClaimsFromToken(String token) {
-        return Jwts.parserBuilder()
-                .setSigningKey(Base64.getEncoder().encode(secret.getBytes()))
+
+        SecretKey key = Keys.hmacShaKeyFor(Decoders.BASE64.decode(secret));
+        return Jwts.parser()
+                .verifyWith(key)
                 .build()
-                .parseClaimsJws(token)
-                .getBody();
+                .parseSignedClaims(token)
+                .getPayload();
     }
     public static class VerificationResult{
         public Claims claims;

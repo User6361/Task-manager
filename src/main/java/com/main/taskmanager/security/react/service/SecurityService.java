@@ -1,11 +1,15 @@
-package com.main.taskmanager.security.react;
+package com.main.taskmanager.security.react.service;
 
 import com.main.taskmanager.exception.AuthException;
+import com.main.taskmanager.security.react.PDFDK2Encoder;
+import com.main.taskmanager.security.react.TokenDetails;
 import com.main.taskmanager.user.model.User;
 import com.main.taskmanager.user.repository.ReactiveUserRepository;
+import com.main.taskmanager.user.service.react.impl.ReactUserServiceImlp;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
@@ -15,9 +19,10 @@ import java.util.*;
 
 @Component
 @RequiredArgsConstructor
+@Slf4j
 public class SecurityService {
 
-    private final ReactiveUserRepository reactiveUserRepository;
+    private final ReactUserServiceImlp reactUserServiceImlp;
     private final PasswordEncoder passwordEncoder;
 
     @Value("${app.jwt.secret}")
@@ -53,7 +58,7 @@ public class SecurityService {
                 .setSubject(subject)
                 .setIssuedAt(createdDate)
                 .setId(UUID.randomUUID().toString())
-                .setExpiration(createdDate)
+                .setExpiration(expirationDate)
                 .signWith(SignatureAlgorithm.HS256, Base64.getEncoder().encodeToString(secret.getBytes()))
                 .compact();
 
@@ -65,9 +70,10 @@ public class SecurityService {
     }
 
     public Mono<TokenDetails> authenticate(String username, String password) {
-        return reactiveUserRepository.findByUsername(username)
+        return reactUserServiceImlp.getUserByUserName(username)
                 .flatMap(user -> {
-                    if(passwordEncoder.matches(password, user.getPassword())) {
+
+                    if(!passwordEncoder.matches(password, user.getPassword())) {
                         return Mono.error(new AuthException("Incorrect password"));
                     }
                     return Mono.just(generateToken(user).toBuilder().id(user.getId()).build());

@@ -1,29 +1,21 @@
 package com.main.taskmanager.user.model;
 
-import com.main.taskmanager.task.model.Task;
-import com.main.taskmanager.task.model.enumclasses.Priority;
-import com.main.taskmanager.task.model.enumclasses.TaskStatus;
 import com.main.taskmanager.user.model.enumclasses.Role;
-import jakarta.persistence.*;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
 import lombok.*;
-import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.data.annotation.Id;
+import org.springframework.data.annotation.Transient;
+import org.springframework.data.relational.core.mapping.Column;
+import org.springframework.data.relational.core.mapping.Table;
 
-import java.util.*;
+import java.util.HashSet;
+import java.util.Set;
 
-/**
- * Сущность JPA, представляющая пользователя в системе.
- * Реализует интерфейс {@link UserDetails} Spring Security, что позволяет
- * использовать этот класс напрямую в механизмах аутентификации.
- *
- * <p>Аннотации Lombok {@code @Getter}, {@code @Setter}, {@code @Builder} и т.д.
- * используются для автоматической генерации стандартных методов.</p>
- */
-@Entity
-@Table(name = "users")
+@Table("users")
 @NoArgsConstructor
 @AllArgsConstructor
-@Builder
+@Builder(toBuilder = true)
 @Getter
 @Setter
 public class User {
@@ -32,27 +24,19 @@ public class User {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(unique = true, nullable = false)
     private String username;
 
-    @Column(nullable = false)
     private String password;
+
     private String email;
+
+    @Column("full_name")
     private String fullName;
 
-    @ElementCollection(targetClass = Role.class,  fetch = FetchType.EAGER)
-    @JoinTable(name =  "user_roles", joinColumns = @JoinColumn(name = "user_id"))
-    @Column(name = "roles ", nullable = false)
-    @Enumerated(EnumType.STRING)
+
+    @Transient
     @Builder.Default
-    @Setter(value = AccessLevel.PUBLIC)
     private Set<Role> roles = new HashSet<>();
-
-
-    @OneToMany(mappedBy = "assignee", fetch = FetchType.EAGER)
-    private List<Task> assignedTasks;
-
-
 
 
     @Override
@@ -62,8 +46,6 @@ public class User {
                 ", username='" + username + '\'' +
                 ", email='" + email + '\'' +
                 ", fullName='" + fullName + '\'' +
-                ", Roles='" + roles.toString() + '\'' +
-                ", assignedTasks=" + (assignedTasks != null ? assignedTasks.size() : 0) + // Только количество задач
                 '}';
     }
 }

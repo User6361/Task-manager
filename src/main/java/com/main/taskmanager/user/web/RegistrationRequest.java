@@ -8,17 +8,14 @@ import tools.jackson.databind.PropertyNamingStrategies;
 import tools.jackson.databind.annotation.JsonNaming;
 
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
-
 
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-@JsonNaming(PropertyNamingStrategies.SnakeCaseStrategy.class)
-public class UserResponse {
-    private Long id;
+public class RegistrationRequest {
     private String username;
+    private String password;
     private String email;
     private String fullName;
     private Set<Role> roles = new HashSet<>();
