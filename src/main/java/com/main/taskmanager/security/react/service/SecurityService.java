@@ -1,13 +1,11 @@
 package com.main.taskmanager.security.react.service;
 
 import com.main.taskmanager.exception.AuthException;
-import com.main.taskmanager.security.react.PDFDK2Encoder;
 import com.main.taskmanager.security.react.TokenDetails;
 import com.main.taskmanager.user.model.User;
-import com.main.taskmanager.user.repository.ReactiveUserRepository;
 import com.main.taskmanager.user.service.react.impl.ReactUserServiceImlp;
 import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.SignatureAlgorithm;
+import io.jsonwebtoken.security.Keys;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -15,7 +13,10 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 import reactor.core.publisher.Mono;
 
+import java.nio.charset.StandardCharsets;
 import java.util.*;
+
+import javax.crypto.SecretKey;
 
 @Component
 @RequiredArgsConstructor
@@ -51,15 +52,20 @@ public class SecurityService {
     }
 
     private TokenDetails generateToken(Date expirationDate, Map<String, Object> claims, String subject) {
+        
+        ///ИЗМЕНЕНИЕ СПОСОБА ГЕНЕРАЦИИ ТОКЕНА 
+        ///СТАРЫЙ МЕТОД БЫЛ ИЗМЕНЕН НА НОВЫЙ
+        
+        SecretKey key = Keys.hmacShaKeyFor(secret.getBytes(StandardCharsets.UTF_8));
         Date createdDate = new Date();
         String token = Jwts.builder()
-                .setClaims(claims)
-                .setIssuer(issuer)
-                .setSubject(subject)
-                .setIssuedAt(createdDate)
-                .setId(UUID.randomUUID().toString())
-                .setExpiration(expirationDate)
-                .signWith(SignatureAlgorithm.HS256, Base64.getEncoder().encodeToString(secret.getBytes()))
+                .claims(claims)
+                .issuer(issuer)
+                .subject(subject)
+                .issuedAt(createdDate)
+                .id(UUID.randomUUID().toString())
+                .expiration(expirationDate)
+                .signWith(key)
                 .compact();
 
         return TokenDetails.builder()
