@@ -3,6 +3,7 @@ package com.main.taskmanager.jwt.handler;
 import com.main.taskmanager.exception.AuthException;
 import com.main.taskmanager.exception.ExpiredTokenException;
 import com.main.taskmanager.exception.UnahtorizedException;
+import com.main.taskmanager.security.react.AuthenticationManager;
 import io.jsonwebtoken.Claims;
 
 import io.jsonwebtoken.ExpiredJwtException;
@@ -11,6 +12,7 @@ import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Component;
 import reactor.core.publisher.Mono;
 
@@ -33,12 +35,14 @@ public class JwtHandler {
     }
 
 
+
     private VerificationResult verify(String token){
         Claims claims = getClaimsFromToken(token);
         final Date expirationDate = claims.getExpiration();
         if(expirationDate.before(new Date())){
              throw new RuntimeException("Token has expired");
         }
+
         return new VerificationResult(claims, token);
 
     }

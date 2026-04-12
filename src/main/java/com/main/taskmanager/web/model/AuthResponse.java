@@ -16,7 +16,9 @@ import java.util.List;
 
 public class AuthResponse {
     private Long id;
-    private String token;
+    private String accessToken;
+    private String refreshToken;
     private Date issuedAt;
     private Date expiresAt;
+    private String message;
 }

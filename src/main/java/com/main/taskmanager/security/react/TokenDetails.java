@@ -16,5 +16,5 @@ public class TokenDetails {
     private String token;
     private Date issuedAt;
     private Date expiresAt;
-
+    private boolean revoked;
 }

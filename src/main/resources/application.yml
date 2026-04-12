@@ -50,3 +50,4 @@ app:
     #seconds
     expiration: 3600
     issuer: esty
+    refreshExpiration: 10000
