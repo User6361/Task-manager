@@ -2,6 +2,7 @@ package com.main.taskmanager.security.react.service;
 
 import com.main.taskmanager.exception.AuthException;
 import com.main.taskmanager.security.react.TokenDetails;
+import com.main.taskmanager.token.enumclasses.TokenType;
 import com.main.taskmanager.token.model.Token;
 import com.main.taskmanager.token.serv.ReactTokenService;
 import com.main.taskmanager.user.model.User;
@@ -40,13 +41,17 @@ public class SecurityService {
     @Value("${app.jwt.refreshExpiration}")
     private Integer refreshExpirationInSeconds;
 
+    /// ACCESS TOKEN
+
     /// BEST_1
     private TokenDetails generateToken(User user) {
 
         Map<String, Object> claims = new HashMap<>(){{
             put("roles", user.getRoles());
             put("username",  user.getUsername());
+            put("tokenType",  TokenType.ACCESS);
         }
+
         };
         return generateToken(claims, user.getId().toString());
     }
@@ -83,8 +88,13 @@ public class SecurityService {
                 .token(token)
                 .issuedAt(createdDate)
                 .expiresAt(expirationDate)
+                .tokenType(TokenType.ACCESS)
                 .build();
     }
+
+
+
+    /// REFRESH TOKEN
 
 
     /// BEST_1
@@ -92,6 +102,7 @@ public class SecurityService {
         Map<String, Object> claims = new HashMap<>(){{
             put("roles", user.getRoles());
             put("username",  user.getUsername());
+            put("tokenType",  TokenType.REFRESH);
         }
         };
         return generateRefreshToken(claims, user.getId().toString());
@@ -106,7 +117,23 @@ public class SecurityService {
     }
     /// BEST_3
     private TokenDetails generateRefreshToken(Date expirationDate, Map<String, Object> claims, String subject) {
-        return generateToken(expirationDate, claims, subject);
+        Date createdDate = new Date();
+        String token = Jwts.builder()
+                .claims(claims)
+                .issuer(issuer)
+                .subject(subject)
+                .issuedAt(createdDate)
+                .id(UUID.randomUUID().toString())
+                .expiration(expirationDate)
+                .signWith(generateSingKey(), SignatureAlgorithm.HS256)
+                .compact();
+
+        return TokenDetails.builder()
+                .token(token)
+                .issuedAt(createdDate)
+                .expiresAt(expirationDate)
+                .tokenType(TokenType.REFRESH)
+                .build();
     }
 
 
@@ -130,6 +157,8 @@ public class SecurityService {
 
 
 
+                    log.info("Длина рефреш токена - {}", String.valueOf(refreshTokenDetails.getToken().toString().length()));
+                    log.info("Длина аксес токена - {}",  String.valueOf(accessTokenDetauls.getToken().toString().length()));
                     return reactTokenService.save(refreshTokenForDB)
                             .map(savedToken -> AuthResponse.builder()
                                     .id(user.getId())

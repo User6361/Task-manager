@@ -39,10 +39,13 @@ public class JwtHandler {
     private VerificationResult verify(String token){
         Claims claims = getClaimsFromToken(token);
         final Date expirationDate = claims.getExpiration();
+        String tokenType = claims.get("tokenType").toString();
         if(expirationDate.before(new Date())){
              throw new RuntimeException("Token has expired");
         }
-
+        if(tokenType.equals("REFRESH")){
+            throw new RuntimeException("Refresh token must not to be for access");
+        }
         return new VerificationResult(claims, token);
 
     }

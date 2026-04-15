@@ -1,5 +1,6 @@
 package com.main.taskmanager.security.react;
 
+import com.main.taskmanager.token.enumclasses.TokenType;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -16,5 +17,6 @@ public class TokenDetails {
     private String token;
     private Date issuedAt;
     private Date expiresAt;
+    private TokenType tokenType;
     private boolean revoked;
 }

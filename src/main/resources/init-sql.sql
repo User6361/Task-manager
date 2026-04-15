@@ -23,7 +23,7 @@ CREATE TABLE tasks (
 
 CREATE TABLE token (
                        id SERIAL PRIMARY KEY,
-                       token VARCHAR(255) NOT NULL,
+                       token VARCHAR(275) NOT NULL,
                        expire_date TIMESTAMP NOT NULL,
                        expired BOOLEAN NOT NULL DEFAULT FALSE,
                        revoked BOOLEAN NOT NULL DEFAULT FALSE,
