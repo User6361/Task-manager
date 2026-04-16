@@ -30,3 +30,8 @@ CREATE TABLE token (
                        owner_id INTEGER,
                        CONSTRAINT fk_token_owner FOREIGN KEY (owner_id) REFERENCES users (id) ON DELETE SET NULL
 );
+
+CREATE TABLE black_list (
+    id SERIAL PRIMARY KEY,
+
+);

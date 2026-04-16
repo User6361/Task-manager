@@ -9,5 +9,5 @@ public interface ReactTokenService {
     Mono<Void> deleteToken(Long tokenId);
     Mono<Void> deleteAllTokens();
     Mono<Token> updateToken(Long tokenId, Token token);
-
+    Mono<Void> deleteByOwnerId(Long ownerId);
 }

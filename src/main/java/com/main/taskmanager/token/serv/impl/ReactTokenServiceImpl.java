@@ -10,6 +10,8 @@ import org.springframework.stereotype.Repository;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Mono;
 
+import java.util.Optional;
+
 
 @Service
 @RequiredArgsConstructor
@@ -20,7 +22,7 @@ public class ReactTokenServiceImpl implements ReactTokenService {
 
     @Override
     public Mono<Token> save(Token token) {
-        return reactTokenRepository.save(token);
+        return reactTokenRepository.deleteByOwnerId(token.getOwnerId()).then(reactTokenRepository.save(token));
     }
 
     @Override
@@ -48,5 +50,10 @@ public class ReactTokenServiceImpl implements ReactTokenService {
                     existingToken.setOwnerId(token.getOwnerId());
                     return reactTokenRepository.save(existingToken);
                 });
+    }
+
+    @Override
+    public Mono<Void> deleteByOwnerId(Long ownerId) {
+        return reactTokenRepository.deleteByOwnerId(ownerId);
     }
 }

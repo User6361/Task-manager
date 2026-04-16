@@ -2,6 +2,7 @@ package com.main.taskmanager.rest;
 
 import com.main.taskmanager.security.react.CustomPrincipal;
 import com.main.taskmanager.security.react.service.SecurityService;
+import com.main.taskmanager.token.serv.ReactTokenService;
 import com.main.taskmanager.user.mapper.UserMapper;
 import com.main.taskmanager.user.model.User;
 import com.main.taskmanager.user.model.UserRole;
@@ -14,11 +15,13 @@ import com.main.taskmanager.web.model.AuthRequest;
 import com.main.taskmanager.web.model.AuthResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+import java.security.Principal;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
@@ -35,6 +38,7 @@ public class AuthRestControllerV1 {
     private final ReactUserServiceImlp reactUserServiceImlp;
     private final UserMapper userMapper;
     private final ReactUserRoleServiceImpl reactUserRoleServiceImpl;
+    private final ReactTokenService reactTokenService;
 
     @PostMapping("/register")
     public Mono<UserResponse> register(@RequestBody RegistrationRequest registrationRequest) {
@@ -73,9 +77,15 @@ public class AuthRestControllerV1 {
     }
 
     @PostMapping("/logout")
-    public Mono<AuthResponse> logout(Authentication authentication) {
-        return null;
+    public Mono<ResponseEntity<Void>> logout(Authentication authentication) {
+        CustomPrincipal customPrincipal = (CustomPrincipal) authentication.getPrincipal();
+        return reactTokenService.deleteByOwnerId(customPrincipal.getId())
+                .then(Mono.just(ResponseEntity.ok().build()));
     }
 
+    @PostMapping("/refresh")
+    public Mono<ResponseEntity<Void>> refreshToken(Authentication authentication) {
+        return null;
+    }
 
 }
