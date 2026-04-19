@@ -3,6 +3,8 @@ package com.main.taskmanager.init;
 
 import com.main.taskmanager.user.model.enumclasses.Role;
 import com.main.taskmanager.user.service.UserService;
+import com.main.taskmanager.user.service.react.ReactUserService;
+import com.main.taskmanager.user.service.react.impl.ReactUserServiceImlp;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.CommandLineRunner;
@@ -21,7 +23,7 @@ import org.springframework.stereotype.Component;
 @Slf4j
 public class DataInitializer implements CommandLineRunner {
 
-    private final UserService userService;
+    private final ReactUserService userService;
 
     /**
      * Метод, выполняемый после старта контекста Spring.

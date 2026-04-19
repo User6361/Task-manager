@@ -15,37 +15,13 @@ import org.springframework.stereotype.Component;
 import java.util.List;
 import java.util.Optional;
 
-/**
- * Компонент-Фасад для инкапсуляции и упрощения сложной бизнес-логики,
- * связанной с назначением, снятием назначения и обновлением задач.
- * Обеспечивает централизованную проверку прав доступа перед выполнением операций.
- */
+
 @Component
 @RequiredArgsConstructor
 @Slf4j
 public class TaskAssignFacade {
 
     private final TaskService taskService;
-
-    /**
-     * Основной метод для изменения назначения, приоритета и/или статуса задачи.
-     * <p>
-     * <b>Логика доступа:</b>
-     * <ul>
-     * <li>ADMINISTRATOR: Может изменять любые параметры любой задачи.</li>
-     * <li>USER: Может изменять только параметры задачи, назначенной ему, но только если этот метод используется
-     * через специализированный путь (например, {@code updateTaskStatusByUser}).</li>
-     * </ul>
-     * Если {@code assigneeId} отсутствует, происходит снятие назначения (unassign).
-     *
-     * @param taskId ID изменяемой задачи.
-     * @param assigneeId Опциональный ID нового назначенного пользователя (если пуст, задача снимается с назначения).
-     * @param priority Новый приоритет задачи.
-     * @param status Новый статус задачи.
-     * @param currentUser Пользователь, инициировавший изменение.
-     * @param redirectPath Путь для перенаправления в случае успешного выполнения или недостаточных прав.
-     * @return Путь для перенаправления (String).
-     */
     @Loggable
     public String assignOrUpdateTask(Long taskId,
                                      Optional<Long> assigneeId,
@@ -77,16 +53,6 @@ public class TaskAssignFacade {
         return redirectPath;
     }
 
-    /**
-     * Специализированный метод для изменения ТОЛЬКО статуса задачи обычным пользователем.
-     * Выполняет строгую проверку, что задача назначена именно этому пользователю.
-     *
-     * @param taskId ID изменяемой задачи.
-     * @param currentUser Пользователь, инициировавший изменение.
-     * @param status Новый статус задачи.
-     * @param redirectPath Путь для перенаправления.
-     * @return Путь для перенаправления (String).
-     */
     @Loggable
     public String updateTaskStatusByUser(Long taskId,
                                          User currentUser,
@@ -126,13 +92,6 @@ public class TaskAssignFacade {
         return redirectPath;
     }
 
-    /**
-     * Вспомогательный метод для подсчета количества незавершенных задач.
-     * Используется для отображения уведомлений в UI.
-     *
-     * @param userTasks Список задач пользователя.
-     * @return Количество задач со статусом, отличным от COMPLETED.
-     */
     public long getCountOfMyTasksMessage(List<Task> userTasks){
         return userTasks.stream()
                 .filter(task -> task.getStatus() != TaskStatus.COMPLETED)

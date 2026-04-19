@@ -81,7 +81,7 @@
             <h5 class="mb-0">Create New Task</h5>
         </div>
         <div class="card-body">
-            <form th:action="@{/tasks}" method="post" th:if="${currentUser.role.name() == 'ADMINISTRATOR'}">
+            <form th:action="@{/tasks}" method="post" th:if="${currentUserRoles.stream().anyMatch()}">
                 <div class="row g-3">
                     <div class="col-md-4">
                         <label for="title" class="form-label">Task Title</label>
