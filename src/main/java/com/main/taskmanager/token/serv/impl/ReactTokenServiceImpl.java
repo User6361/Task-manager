@@ -56,4 +56,9 @@ public class ReactTokenServiceImpl implements ReactTokenService {
     public Mono<Void> deleteByOwnerId(Long ownerId) {
         return reactTokenRepository.deleteByOwnerId(ownerId);
     }
+
+    @Override
+    public Mono<Token> findByToken(String token) {
+        return reactTokenRepository.findByToken(token);
+    }
 }

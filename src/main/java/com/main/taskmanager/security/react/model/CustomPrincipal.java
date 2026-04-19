@@ -1,4 +1,4 @@
-package com.main.taskmanager.security.react;
+package com.main.taskmanager.security.react.model;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;

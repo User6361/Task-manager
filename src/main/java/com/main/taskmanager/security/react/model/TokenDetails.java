@@ -1,4 +1,4 @@
-package com.main.taskmanager.security.react;
+package com.main.taskmanager.security.react.model;
 
 import com.main.taskmanager.token.enumclasses.TokenType;
 import lombok.AllArgsConstructor;
@@ -6,6 +6,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.time.LocalDateTime;
 import java.util.Date;
 
 @Data
@@ -13,7 +14,6 @@ import java.util.Date;
 @NoArgsConstructor
 @AllArgsConstructor
 public class TokenDetails {
-    private Long id;
     private String token;
     private Date issuedAt;
     private Date expiresAt;

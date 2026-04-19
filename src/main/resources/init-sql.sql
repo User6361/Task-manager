@@ -32,6 +32,8 @@ CREATE TABLE token (
 );
 
 CREATE TABLE black_list (
-    id SERIAL PRIMARY KEY,
-
+                       id SERIAL PRIMARY KEY,
+                       token TEXT NOT NULL,
+                       user_id INTEGER,
+                       expiry_date TIMESTAMP NOT NULL
 );

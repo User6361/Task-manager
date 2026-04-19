@@ -7,6 +7,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.BeanRegistrarDslMarker;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Bean;
@@ -35,8 +36,9 @@ public class WebSecurityConfig {
 
     @Value("${app.jwt.secret}")
     private String secret;
-
-    private final String[] publicRoutes = {"/api/v1/auth/login", "/api/v1/auth/register"};
+    @Autowired
+    private JwtHandler jwtHandler;
+    private final String[] publicRoutes = {"/api/v1/auth/login", "/api/v1/auth/register", "/api/v1/auth/refresh"};
 
 
     @Bean
@@ -73,7 +75,7 @@ public class WebSecurityConfig {
 
     private AuthenticationWebFilter bearerAuthFilter(AuthenticationManager authenticationManager) {
         AuthenticationWebFilter bearerAuthFilter = new AuthenticationWebFilter(authenticationManager);
-        bearerAuthFilter.setServerAuthenticationConverter(new BearerTokenServiceAuthenticationConverter(new JwtHandler(secret)));
+        bearerAuthFilter.setServerAuthenticationConverter(new BearerTokenServiceAuthenticationConverter(jwtHandler));
         bearerAuthFilter.setRequiresAuthenticationMatcher(ServerWebExchangeMatchers.pathMatchers("/**"));
         return bearerAuthFilter;
 

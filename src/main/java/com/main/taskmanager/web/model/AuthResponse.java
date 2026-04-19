@@ -6,6 +6,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.time.LocalDateTime;
 import java.util.Date;
 import java.util.List;
 
@@ -18,7 +19,9 @@ public class AuthResponse {
     private Long id;
     private String accessToken;
     private String refreshToken;
-    private Date issuedAt;
-    private Date expiresAt;
+    private Date issuedAtAccessToken;
+    private Date expiresAtAccessToken;
+    private Date issuedAtRefreshToken;
+    private Date expiresAtRefreshToken;
     private String message;
 }

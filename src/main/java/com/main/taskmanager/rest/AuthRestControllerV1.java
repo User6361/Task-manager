@@ -1,11 +1,12 @@
 package com.main.taskmanager.rest;
 
-import com.main.taskmanager.security.react.CustomPrincipal;
+import com.main.taskmanager.blackList.model.BlackList;
+import com.main.taskmanager.blackList.serv.BlackListServ;
+import com.main.taskmanager.security.react.model.CustomPrincipal;
 import com.main.taskmanager.security.react.service.SecurityService;
 import com.main.taskmanager.token.serv.ReactTokenService;
 import com.main.taskmanager.user.mapper.UserMapper;
 import com.main.taskmanager.user.model.User;
-import com.main.taskmanager.user.model.UserRole;
 import com.main.taskmanager.user.model.enumclasses.Role;
 import com.main.taskmanager.user.service.react.impl.ReactUserRoleServiceImpl;
 import com.main.taskmanager.user.service.react.impl.ReactUserServiceImlp;
@@ -13,6 +14,8 @@ import com.main.taskmanager.user.web.RegistrationRequest;
 import com.main.taskmanager.user.web.UserResponse;
 import com.main.taskmanager.web.model.AuthRequest;
 import com.main.taskmanager.web.model.AuthResponse;
+import com.main.taskmanager.web.model.RefreshRequest;
+import com.main.taskmanager.web.model.TokenResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
@@ -21,11 +24,8 @@ import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
-import java.security.Principal;
-import java.util.HashSet;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Set;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.stream.Collectors;
 
 @RestController
@@ -39,6 +39,7 @@ public class AuthRestControllerV1 {
     private final UserMapper userMapper;
     private final ReactUserRoleServiceImpl reactUserRoleServiceImpl;
     private final ReactTokenService reactTokenService;
+    private final BlackListServ blackListServ;
 
     @PostMapping("/register")
     public Mono<UserResponse> register(@RequestBody RegistrationRequest registrationRequest) {
@@ -79,13 +80,19 @@ public class AuthRestControllerV1 {
     @PostMapping("/logout")
     public Mono<ResponseEntity<Void>> logout(Authentication authentication) {
         CustomPrincipal customPrincipal = (CustomPrincipal) authentication.getPrincipal();
-        return reactTokenService.deleteByOwnerId(customPrincipal.getId())
-                .then(Mono.just(ResponseEntity.ok().build()));
+        Long  userId = customPrincipal.getId();
+        String token = (String) authentication.getCredentials();
+        BlackList blackList = new BlackList().toBuilder()
+                .expiryDate(LocalDateTime.now(ZoneId.of("UTC")))
+                .token(token)
+                .userId(customPrincipal.getId())
+                .build();
+        log.info("User id - " + userId);
+        return reactTokenService.deleteByOwnerId(userId).then(blackListServ.save(blackList)).thenReturn(ResponseEntity.ok().build());
     }
-
     @PostMapping("/refresh")
-    public Mono<ResponseEntity<Void>> refreshToken(Authentication authentication) {
-        return null;
+    public Mono<AuthResponse> refresh(@RequestBody RefreshRequest request) {
+        return securityService.refresh(request.refreshToken());
     }
 
 }

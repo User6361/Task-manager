@@ -48,6 +48,6 @@ app:
         keyLenght: 256
     secret: 79d21d70352b250e4d8bd109a9a113e3ae80f444052048165553482e250827e5
     #seconds
-    expiration: 3600
+    expiration: 600000
     issuer: esty
-    refreshExpiration: 10000
+    refreshExpiration: 604800000
